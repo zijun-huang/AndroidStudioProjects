@@ -16,8 +16,17 @@
         android:hint="Enter seconds" />
 
     <EditText
+        android:id="@+id/edit_text_minute"
+        android:inputType="number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/edit_text_second"
+        android:layout_centerHorizontal="true"
+        android:hint="Enter minutes" />
+
+    <EditText
         android:id="@+id/edit_text_answerToQuiz"
-        android:inputType="textPersonName"
+        android:inputType="number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textview_quiz"
@@ -49,7 +58,7 @@
         android:textSize="60sp" />
 
     <Button
-        android:id="@+id/button_start_pause"
+        android:id="@+id/button_start_pause_resume"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -61,7 +70,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/button_start_pause"
+        android:layout_below="@+id/button_start_pause_resume"
         android:text="Reset"
         android:visibility="invisible"
         tools:visibility="visible" />

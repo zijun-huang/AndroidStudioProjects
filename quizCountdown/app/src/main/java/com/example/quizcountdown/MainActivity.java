@@ -28,6 +28,7 @@ pending:
 public class MainActivity extends AppCompatActivity {
     private class Quiz{
         public boolean isPassed = false;
+        public String quizString;
         public String answer;
         private int minNum = 1;
         private int maxNum = 10;
@@ -36,23 +37,20 @@ public class MainActivity extends AppCompatActivity {
             Random r = new Random();
             int a = r.nextInt(maxNum - minNum + 1) + minNum;
             int b = r.nextInt(maxNum - minNum + 1) + minNum;
-            displayQuiz(a, b);
+            //displayQuiz(a, b);
 
+            quizString = a + "+" + b + "= ?";
             answer = Integer.toString(a + b);
 
         }
-
-        private void displayQuiz(int a, int b) {
-            String quizString = a + "+" + b + "= ?";
-            mTextViewQuiz.setText(quizString);
-        }
     }
+
     private static final long START_TIME_IN_MILLIS = 0;
     private long timeLastSet;
-    //private TextView mEditTextMinute;
+    private TextView mEditTextMinute;
     private TextView mEditTextSecond;
     private TextView mTextViewCountDown;
-    private Button mButtonStartPause;
+    private Button mButtonStartPauseResume;
     private Button mButtonReset;
     private Button mButtonStopAlarm;
 
@@ -76,11 +74,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mEditTextMinute = findViewById(R.id.edit_text_minute);
         mEditTextSecond = findViewById(R.id.edit_text_second);
 
         mTextViewCountDown = findViewById(R.id.textview_countdown);
 
-        mButtonStartPause = findViewById(R.id.button_start_pause);
+        mButtonStartPauseResume = findViewById(R.id.button_start_pause_resume);
         mButtonReset = findViewById(R.id.button_reset);
         mButtonStopAlarm = findViewById(R.id.button_stop_alarm);
         mediaPlayer = MediaPlayer.create(this, R.raw.alarm);
@@ -90,13 +89,17 @@ public class MainActivity extends AppCompatActivity {
         mButtonSubmitAnswer = findViewById(R.id.button_submit_answer);
         mQuiz = new Quiz();
 
-        mButtonStartPause.setOnClickListener(new View.OnClickListener() {
+        mButtonStartPauseResume.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mTimerRunning) {
                     pauseTimer();
                 } else {
-                    startTimer();
+                    if (mTimeLeftInMillis == timeLastSet) {
+                        startTimer();
+                    } else {
+                        resumeTimer();
+                    }
                 }
             }
         });
@@ -127,30 +130,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void startTimer() {
         try { // take user input and start a countdown timer
-            int minutes = 0;
+            int minutes = Integer.parseInt(mEditTextMinute.getText().toString());
             int seconds = Integer.parseInt(mEditTextSecond.getText().toString());
 
             mTimeLeftInMillis = (long) minutes * 60000 + seconds * 1000;
             timeLastSet = mTimeLeftInMillis;
 
-            mCountDownTimer = new CountDownTimer(mTimeLeftInMillis,1000) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    mTimeLeftInMillis = millisUntilFinished;
-                    updateCountDownText();
-                }
+            runTheTimer();
 
-                @Override
-                public void onFinish() {
-                    mTimerRunning = false;
-                    startAlarmLoop();
-                    //mediaPlayer.start();
-                    updateButtonDisplay("finish timer");
-                    quizUser();
-                }
-            }.start();
-
-            mTimerRunning = true;
             updateButtonDisplay("start timer");
 
         } catch (NumberFormatException e) {
@@ -162,6 +149,33 @@ public class MainActivity extends AppCompatActivity {
         mCountDownTimer.cancel();
         mTimerRunning = false;
         updateButtonDisplay("pause timer");
+    }
+
+    private void resumeTimer() {
+        runTheTimer();
+        updateButtonDisplay("resume timer");
+
+    }
+
+    private void runTheTimer() {
+        mCountDownTimer = new CountDownTimer(mTimeLeftInMillis,1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                mTimeLeftInMillis = millisUntilFinished;
+                updateCountDownText();
+            }
+
+            @Override
+            public void onFinish() {
+                mTimerRunning = false;
+                startAlarmLoop();
+                //mediaPlayer.start();
+                updateButtonDisplay("finish timer");
+                quizUser();
+            }
+        }.start();
+
+        mTimerRunning = true;
     }
 
     private void resetTimer() {
@@ -177,6 +191,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void quizUser() {
         mQuiz.generateQuiz();
+        displayQuiz();
+    }
+
+    private void displayQuiz() {
+        mTextViewQuiz.setText(mQuiz.quizString);
     }
 
     private void checkAnswer() {
@@ -213,34 +232,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateCountDownText() {
-        int minutes = (int) mTimeLeftInMillis / 60000;
-        int seconds = (int) mTimeLeftInMillis / 1000 % 60;
+        int hour = (int) mTimeLeftInMillis / (3600000);
+        int minute = (int) mTimeLeftInMillis / 60000;
+        int second = (int) mTimeLeftInMillis / 1000 % 60;
 
-        String timeLeftFormated = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+        String timeLeftFormated = String.format(Locale.getDefault(), "%02d:%02d:%02d", hour, minute, second);
         mTextViewCountDown.setText(timeLeftFormated);
     }
 
     private void updateButtonDisplay (String status) {
         // status: ["start timer", "pause timer", "reset timer", "finish timer", "pass quiz", "stop alarm"]
         if (status.equals("start timer")) {
-            mButtonStartPause.setText("Pause");
-            mButtonStartPause.setVisibility(View.VISIBLE);
+            mButtonStartPauseResume.setText("Pause");
+            mButtonStartPauseResume.setVisibility(View.VISIBLE);
             mButtonReset.setVisibility(View.INVISIBLE);
         }
 
         if (status.equals("pause timer")) {
-            mButtonStartPause.setText("Start");
+            mButtonStartPauseResume.setText("Resume");
             mButtonReset.setVisibility(View.VISIBLE);
+        }
+
+        if (status.equals("resume timer")) {
+            mButtonStartPauseResume.setText("Pause");
+            mButtonReset.setVisibility(View.INVISIBLE);
         }
 
         if (status.equals("reset timer")) {
             mButtonReset.setVisibility(View.INVISIBLE);
-            mButtonStartPause.setVisibility(View.VISIBLE);
+            mButtonStartPauseResume.setText("Start");
+            mButtonStartPauseResume.setVisibility(View.VISIBLE);
         }
 
         if (status.equals("finish timer")) {
-            mButtonStartPause.setText("Start");
-            mButtonStartPause.setVisibility(View.INVISIBLE);
+            mButtonStartPauseResume.setText("Start");
+            mButtonStartPauseResume.setVisibility(View.INVISIBLE);
             mButtonReset.setVisibility(View.INVISIBLE);
             mTextViewQuiz.setVisibility(View.VISIBLE);
             mEditTextAnswerToQuiz.setVisibility(View.VISIBLE);
@@ -258,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (status.equals("stop alarm")) {
             mButtonStopAlarm.setVisibility(View.INVISIBLE);
-            mButtonStartPause.setVisibility(View.VISIBLE);
+            mButtonStartPauseResume.setVisibility(View.VISIBLE);
         }
     }
 }
