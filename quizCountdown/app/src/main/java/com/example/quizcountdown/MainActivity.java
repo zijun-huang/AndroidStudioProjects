@@ -18,6 +18,13 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Random;
 
+/*
+pending:
+(1) allow user to input hours + minutes + seconds
+(2) keep status at orientation changes
+(3)
+ */
+
 public class MainActivity extends AppCompatActivity {
     private class Quiz{
         public boolean isPassed = false;
@@ -29,32 +36,10 @@ public class MainActivity extends AppCompatActivity {
             Random r = new Random();
             int a = r.nextInt(maxNum - minNum + 1) + minNum;
             int b = r.nextInt(maxNum - minNum + 1) + minNum;
-/*
-            int a = 1;
-            int b = 1;
-*/
             displayQuiz(a, b);
 
             answer = Integer.toString(a + b);
-            //answer = "2";
-/*
-            mButtonSubmitAnswer.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
 
-                    try{
-                        int userAnswer = Integer.parseInt(mEditTextAnswerToQuiz.getText().toString());
-                        if (userAnswer == answer) {
-                            isPassed = true;
-                        } else {
-                            isPassed = false;
-                        }
-                    } catch (NumberFormatException e){
-                        Toast.makeText(MainActivity.this, "Integer answer only", Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-*/
         }
 
         private void displayQuiz(int a, int b) {
@@ -63,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     private static final long START_TIME_IN_MILLIS = 0;
-    private static final int DEFAULT_USER_ANSWER = -1;
     private long timeLastSet;
     //private TextView mEditTextMinute;
     private TextView mEditTextSecond;
@@ -139,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         updateCountDownText();
-
     }
 
     private void startTimer() {
@@ -160,26 +143,15 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFinish() {
                     mTimerRunning = false;
-                    mButtonStartPause.setText("Start");
-                    mButtonStartPause.setVisibility(View.INVISIBLE);
-                    mButtonReset.setVisibility(View.INVISIBLE);
-
                     startAlarmLoop();
                     //mediaPlayer.start();
-
-                    mTextViewQuiz.setVisibility(View.VISIBLE);
-                    mEditTextAnswerToQuiz.setVisibility(View.VISIBLE);
-                    mButtonSubmitAnswer.setVisibility(View.VISIBLE);
-
+                    updateButtonDisplay("finish timer");
                     quizUser();
                 }
             }.start();
 
             mTimerRunning = true;
-
-            mButtonStartPause.setText("Pause");
-            mButtonStartPause.setVisibility(View.VISIBLE);
-            mButtonReset.setVisibility(View.INVISIBLE);
+            updateButtonDisplay("start timer");
 
         } catch (NumberFormatException e) {
             Toast.makeText(this,"Enter value in integer only", Toast.LENGTH_LONG).show();
@@ -189,14 +161,12 @@ public class MainActivity extends AppCompatActivity {
     private void pauseTimer() {
         mCountDownTimer.cancel();
         mTimerRunning = false;
-        mButtonStartPause.setText("Start");
-        mButtonReset.setVisibility(View.VISIBLE);
+        updateButtonDisplay("pause timer");
     }
 
     private void resetTimer() {
         mTimeLeftInMillis = timeLastSet;
-        mButtonReset.setVisibility(View.INVISIBLE);
-        mButtonStartPause.setVisibility(View.VISIBLE);
+        updateButtonDisplay("reset timer");
         updateCountDownText();
     }
 
@@ -216,12 +186,8 @@ public class MainActivity extends AppCompatActivity {
                 mQuiz.isPassed = true;
                 Log.e("in CheckAnswers:", "quiz passed");
 
-                mTextViewQuiz.setVisibility(View.INVISIBLE);
-                mEditTextAnswerToQuiz.setVisibility(View.INVISIBLE);
-                mEditTextAnswerToQuiz.setText("");
-                mButtonSubmitAnswer.setVisibility(View.INVISIBLE);
+                updateButtonDisplay("pass quiz");
 
-                mButtonStopAlarm.setVisibility(View.VISIBLE);
             } else {
                 Toast.makeText(this, "Incorrect Answer", Toast.LENGTH_SHORT).show();
             }
@@ -229,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Enter Integer Answer", Toast.LENGTH_LONG).show();
         }
     }
+
 
     private void stopAlarm() {
         mediaPlayer.stop();
@@ -239,8 +206,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        mButtonStopAlarm.setVisibility(View.INVISIBLE);
-        mButtonStartPause.setVisibility(View.VISIBLE);
+        updateButtonDisplay("stop alarm");
         mTimeLeftInMillis = timeLastSet;
         updateCountDownText();
 
@@ -252,5 +218,47 @@ public class MainActivity extends AppCompatActivity {
 
         String timeLeftFormated = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
         mTextViewCountDown.setText(timeLeftFormated);
+    }
+
+    private void updateButtonDisplay (String status) {
+        // status: ["start timer", "pause timer", "reset timer", "finish timer", "pass quiz", "stop alarm"]
+        if (status.equals("start timer")) {
+            mButtonStartPause.setText("Pause");
+            mButtonStartPause.setVisibility(View.VISIBLE);
+            mButtonReset.setVisibility(View.INVISIBLE);
+        }
+
+        if (status.equals("pause timer")) {
+            mButtonStartPause.setText("Start");
+            mButtonReset.setVisibility(View.VISIBLE);
+        }
+
+        if (status.equals("reset timer")) {
+            mButtonReset.setVisibility(View.INVISIBLE);
+            mButtonStartPause.setVisibility(View.VISIBLE);
+        }
+
+        if (status.equals("finish timer")) {
+            mButtonStartPause.setText("Start");
+            mButtonStartPause.setVisibility(View.INVISIBLE);
+            mButtonReset.setVisibility(View.INVISIBLE);
+            mTextViewQuiz.setVisibility(View.VISIBLE);
+            mEditTextAnswerToQuiz.setVisibility(View.VISIBLE);
+            mButtonSubmitAnswer.setVisibility(View.VISIBLE);
+        }
+
+        if (status.equals("pass quiz")) {
+            mTextViewQuiz.setVisibility(View.INVISIBLE);
+            mEditTextAnswerToQuiz.setVisibility(View.INVISIBLE);
+            mEditTextAnswerToQuiz.setText("");
+            mButtonSubmitAnswer.setVisibility(View.INVISIBLE);
+
+            mButtonStopAlarm.setVisibility(View.VISIBLE);
+        }
+
+        if (status.equals("stop alarm")) {
+            mButtonStopAlarm.setVisibility(View.INVISIBLE);
+            mButtonStartPause.setVisibility(View.VISIBLE);
+        }
     }
 }

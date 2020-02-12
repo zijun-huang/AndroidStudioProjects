@@ -8,7 +8,7 @@
 
     <EditText
         android:id="@+id/edit_text_second"
-        android:inputType="textPersonName"
+        android:inputType="number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/textview_countdown"
@@ -30,7 +30,7 @@
         android:id="@+id/textview_quiz"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="160dp"
+        android:layout_marginTop="100dp"
         android:layout_centerHorizontal="true"
         android:visibility="invisible"
         tools:visibility="visible"
@@ -71,7 +71,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/button_reset"
+        android:layout_below="@+id/edit_text_answerToQuiz"
         android:text="Stop alarm"
         android:visibility="invisible"
         tools:visibility="visible" />
