@@ -43,6 +43,11 @@ public class MainActivity extends AppCompatActivity {
             answer = Integer.toString(a + b);
 
         }
+
+        public void generateQuizTwo() {
+            quizString = "Question: ";
+            answer = "Answer";
+        }
     }
 
     private static final long START_TIME_IN_MILLIS = 0;
@@ -191,11 +196,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void quizUser() {
         mQuiz.generateQuiz();
+        //mQuiz.generateQuizTwo();
         displayQuiz();
     }
 
     private void displayQuiz() {
         mTextViewQuiz.setText(mQuiz.quizString);
+        updateButtonDisplay("show quiz");
     }
 
     private void checkAnswer() {
@@ -241,7 +248,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateButtonDisplay (String status) {
-        // status: ["start timer", "pause timer", "reset timer", "finish timer", "pass quiz", "stop alarm"]
+        /* status: ["start timer", "pause timer", "reset timer", "finish timer",
+        "show quiz", "pass quiz", "stop alarm"
+         */
         if (status.equals("start timer")) {
             mButtonStartPauseResume.setText("Pause");
             mButtonStartPauseResume.setVisibility(View.VISIBLE);
@@ -273,8 +282,17 @@ public class MainActivity extends AppCompatActivity {
             mButtonSubmitAnswer.setVisibility(View.VISIBLE);
         }
 
+        if (status.equals("show quiz")) {
+            mEditTextMinute.setVisibility(View.INVISIBLE);
+            mEditTextSecond.setVisibility(View.INVISIBLE);
+
+        }
+
         if (status.equals("pass quiz")) {
             mTextViewQuiz.setVisibility(View.INVISIBLE);
+            mEditTextMinute.setVisibility(View.VISIBLE);
+            mEditTextSecond.setVisibility(View.VISIBLE);
+
             mEditTextAnswerToQuiz.setVisibility(View.INVISIBLE);
             mEditTextAnswerToQuiz.setText("");
             mButtonSubmitAnswer.setVisibility(View.INVISIBLE);
@@ -283,6 +301,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (status.equals("stop alarm")) {
+            mEditTextMinute.setText("");
+            mEditTextSecond.setText("");
             mButtonStopAlarm.setVisibility(View.INVISIBLE);
             mButtonStartPauseResume.setVisibility(View.VISIBLE);
         }
