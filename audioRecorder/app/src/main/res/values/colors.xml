@@ -3,4 +3,8 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="momoshiochya">#1f3134</color>
+    <color name="shirahanairo">#e8ecef</color>
+
 </resources>
